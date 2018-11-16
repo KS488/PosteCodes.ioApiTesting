@@ -81,6 +81,7 @@
       <DependentUpon>APITesting.feature</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ErrorExeptions.cs" />
+    <Compile Include="Helpers\GenericHelper.cs" />
     <Compile Include="Helpers\RestAPIHelper.cs" />
     <Compile Include="postCodeBodyBuilder.cs" />
     <Compile Include="PostCodeResponse.cs" />

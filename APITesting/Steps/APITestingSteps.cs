@@ -1,29 +1,27 @@
-﻿using System;
-using TechTalk.SpecFlow;
+﻿using TechTalk.SpecFlow;
 using APITesting.Helpers;
-using Ninject;
 using NUnit.Framework;
-using Ninject.Modules;
 using APITesting.Assertions;
-using System.Linq;
-using Shouldly;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using RestSharp;
 
 namespace APITesting.Steps
 {
     [Binding]
     public class APITestingSteps
     {
-        private PostcodeAssertion postcodeAssertion;
         private PostCodeResponse postCodeResponse;
-        public string postcodes;
+        private string inputPostcodes;
+        private string responsePostCode;
+        private string originalSpacePostcode;
+        private string responseSpacePostecode;
+        public IRestResponse apiResponse;
 
-        [Given(@"I have a postcode to lookup(.*)")]
+     [Given(@"I have a postcode to lookup(.*)")]
         public void GivenIHaveAPostcodeToLookup(string postcode)
         {
             RestAPIHelper.SetUrl(postcode);
-           postcodes = postcode;
+            inputPostcodes = postcode;
         }
 
         [When(@"I call the get method")]
@@ -31,25 +29,24 @@ namespace APITesting.Steps
         {
             RestAPIHelper.CreateGetRequest();
         }
-
-
+        
         [Then(@"i should get back information of my chosen postcode")]
         public void ThenIShouldGetBackInformationOfMyChosenPostcode()
         {
-            var apiResponse = RestAPIHelper.GetResponse();
+            apiResponse = RestAPIHelper.GetResponse();
             postCodeResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostCodeResponse>(apiResponse.Content);
-            string postCode = postCodeResponse.result.postcode;
-            string res = Regex.Replace(postcodes, ".{4}", "$0 ");
-            var spacePostCode = Regex.Replace(postCode, ".{4}", " $0");
-            Assert.That(postCodeResponse.status, Is.EqualTo(200), "Test Status Not 200");
-            Assert.That(spacePostCode, Is.EqualTo(res));
+            responsePostCode = postCodeResponse.result.postcode;
+            originalSpacePostcode =  GenericHelper.stringSpaceConveter(inputPostcodes);
+            responseSpacePostecode = GenericHelper.responseSpaceConverter(responsePostCode);
+            //--ToDo Move Assertions to the Assertions Folder --//
+            Assert.That(postCodeResponse.status, Is.EqualTo(200), "Test StatusCode Not 200");
+            Assert.That(responseSpacePostecode, Is.EqualTo(originalSpacePostcode));
             
         }
         [Given(@"I called the base url")]
         public void GivenICalledTheBaseUrl()
         {
             RestAPIHelper.BaseUrl();
-
         }
 
         [When(@"I call the post method with the bulk")]
@@ -64,7 +61,10 @@ namespace APITesting.Steps
         [Then(@"i should get back information of all postcodes chosen")]
         public void ThenIShouldGetBackInformationOfAllPostcodesChosen()
         {
-            var apiResponse = RestAPIHelper.GetResponse();
+            /// -- Test Currently failing -- ///
+            apiResponse = RestAPIHelper.GetResponse();
+            postCodeResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostCodeResponse>(apiResponse.Content);
+            Assert.That(postCodeResponse.status, Is.EqualTo(200), "Test StatusCode Not 200");
         }
     }
 }
